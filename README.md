@@ -18,3 +18,5 @@ Current command list:
 "save <Note-to-save>" or "store <Note-to-save>" - Store a "note" in DB associated with "this" user
 
 "get <Note-Lable>" or "retrive <Note-Lable>" or "grab <Note-Lable>" - Retrieve note from DB
+
+"delete <Note-Lable>" or "remove <Note-Lable>" - Delete note
