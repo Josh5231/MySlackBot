@@ -24,3 +24,5 @@ Current command list:
 "delete <Note-Lable>" or "remove <Note-Lable>" - Delete note
 
 "add-to <Note-Lable>" or "append <Note-Lable>" - Add text into a note
+
+"get-list" or "ls" or "my-notes" - Get a list of all stored Note-Lables

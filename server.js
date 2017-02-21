@@ -159,6 +159,18 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
+controller.hears(['get-list', 'ls','my-notes'], 'direct_message,direct_mention,mention', function(bot, message){
+  controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name && user.notes) {
+          var keys =  Object.keys(user.notes);
+          bot.reply(message,"Here is a list of your note lables: \n"+keys.join("\n"));
+        }
+        else{
+          bot.reply(message,"Could not find any notes.");
+        }
+  });
+});
+
 controller.hears(['what are your commands','commands'], 'direct_message,direct_mention,mention', function(bot, message) {
 
     controller.storage.users.get(message.user, function(err, user) {
