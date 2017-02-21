@@ -21,6 +21,7 @@ var controller = Botkit.slackbot({
     debug: false,
     require_delivery: true,
     storage: mongoStorage,
+    stats_optout: true,
 });
 
 var bot = controller.spawn({
@@ -107,17 +108,29 @@ controller.hears(['delete (.*)', 'remove (.*)'], 'direct_message,direct_mention,
     });
 });
 
-/*
+
 controller.hears(['add-to (.*)', 'append (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var id = message.match[1].toLowerCase();
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name && user.notes[id]) {
-           
+           bot.startConversation(message,function(err,convo) {
+            convo.ask('What would you like me to add?',function(response,convo) {
+                user.notes[id]+=" "+response.text;
+                console.log("Adding text:"+response.text);
+                console.log(user.notes[id]);
+              controller.storage.users.save(user,function(err,_id){
+                if(err){ convo.say("There was an error tring to save your text."); }
+                convo.say("Text had been added and saved.");
+              });
+
+              convo.next();
+            });
+           });
         }
         else{ bot.reply(message,"Could not find note: "+id); }
     });
 
-}); */
+}); 
 
 controller.hears(['get (.*)', 'retrive (.*)','grab (.*)'], 'direct_message,direct_mention,mention', function(bot, message) { 
   
