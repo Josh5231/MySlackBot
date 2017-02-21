@@ -118,8 +118,16 @@ controller.hears(['add-to (.*)', 'append (.*)'], 'direct_message,direct_mention,
                     controller.storage.users.save(message.user,function(err,_id){
                       bot.reply(message,"Text added and saved.");
                     });
-                    convo.stop();
-                  });
+                    convo.next();
+                  },{ 'key': 'nickname' });
+                  
+                   convo.on('end', function(convo) {
+                        if (convo.status == 'completed') {
+                          controller.storage.users.save(message.user,function(err,_id){
+                            bot.reply(message,"Text added and saved.");
+                           });
+                        }
+                    });
                   }
             });
         }
