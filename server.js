@@ -27,16 +27,6 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
-controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
-    controller.storage.users.get(message.user, function(err, user) {
-        if (user && user.name) {
-            bot.reply(message, 'Hello ' + user.name + '!!');
-        } else {
-            bot.reply(message, 'Hello. For a list of my commands just ask "what are your commands"');
-        }
-    });
-});
-
 controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var note = message.match[1];
     controller.storage.users.get(message.user, function(err, user) {
@@ -48,35 +38,19 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
                     convo.ask('Save lable as: ' + response.text + '`?', [
                             {
                                 pattern: 'yes',
-                                callback: function(response, convo) {
-                                    // since no further messages are queued after this,
-                                    // the conversation will end naturally with status == 'completed'
-                                    convo.next();
-                                }
+                                callback: function(response, convo) { convo.next(); }
                             },
                             {
                                 pattern: 'ok',
-                                callback: function(response, convo) {
-                                    // since no further messages are queued after this,
-                                    // the conversation will end naturally with status == 'completed'
-                                    convo.next();
-                                }
+                                callback: function(response, convo) { convo.next(); }
                             },
                             {
                                 pattern: 'no',
-                                callback: function(response, convo) {
-                                    // stop the conversation. this will cause it to end with status == 'stopped'
-                                    convo.repeat();
-                                    convo.next();
-                                    //convo.stop();
-                                }
+                                callback: function(response, convo) { convo.stop(); }
                             },
                             {
                                 pattern: 'cancel',
-                                callback: function(response, convo) {
-                                    // stop the conversation. this will cause it to end with status == 'stopped'
-                                    convo.stop();
-                                }
+                                callback: function(response, convo) { convo.stop(); }
                             },
                             {
                                 default: true,
@@ -92,9 +66,9 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
                     
                   convo.on('end', function(convo) {
                         if (convo.status == 'completed') {
-                            bot.reply(message, 'OK! I will update my dossier...');
-
                             controller.storage.users.get(message.user, function(err, user) {
+                              if(err){ console.log("Error getting user"); }
+                                if(!user.notes){ user.notes = {}; }
                                 user.notes[convo.extractResponse('nickname')] = note;
                                 controller.storage.users.save(user, function(err, id) {
                                     bot.reply(message, 'Saved');
@@ -105,7 +79,7 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
 
                         } else {
                             // this happens if the conversation ended prematurely for some reason
-                            bot.reply(message, 'OK, nevermind!');
+                            bot.reply(message, 'OK, NOTE NOT SAVED!');
                         }
                     });
                 }
@@ -134,7 +108,7 @@ controller.hears(['what are your commands'], 'direct_message,direct_mention,ment
 
     controller.storage.users.get(message.user, function(err, user) {
         
-            bot.reply(message, 'The commands I respond to are: "Hello" or "Hi" , "my name is <nickname> or "call me <nickname>" , "what is my name" or "who am I" , "uptime" or "who are you"');
+            bot.reply(message, 'The commands I respond to are: \n "Hello" or "Hi" \n "my name is <nickname> or "call me <nickname>" \n "what is my name" or "who am I" \n "uptime" or "who are you" \n "save <Note-to-save>" or "store <Note-to-save>" \n "get <Note-Lable>" or "retrive <Note-Lable>" or "grab <Note-Lable>" ');
         
     });
 });
@@ -232,35 +206,6 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
     });
 });
 
-/*
-controller.hears(['shutdown'], 'direct_message,direct_mention,mention', function(bot, message) {
-
-    bot.startConversation(message, function(err, convo) {
-
-        convo.ask('Are you sure you want me to shutdown?', [
-            {
-                pattern: bot.utterances.yes,
-                callback: function(response, convo) {
-                    convo.say('Bye!');
-                    convo.next();
-                    setTimeout(function() {
-                        process.exit();
-                    }, 3000);
-                }
-            },
-        {
-            pattern: bot.utterances.no,
-            default: true,
-            callback: function(response, convo) {
-                convo.say('*Phew!*');
-                convo.next();
-            }
-        }
-        ]);
-    });
-});
-*/
-
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
     'direct_message,direct_mention,mention', function(bot, message) {
 
@@ -272,6 +217,16 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
              '>. I have been running for ' + uptime + ' on ' + hostname + '.');
 
     });
+    
+controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
+    controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name) {
+            bot.reply(message, 'Hello ' + user.name + '!!');
+        } else {
+            bot.reply(message, 'Hello. For a list of my commands just ask "what are your commands"');
+        }
+    });
+});
 
 function formatUptime(uptime) {
     var unit = 'second';
