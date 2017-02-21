@@ -28,28 +28,108 @@ var bot = controller.spawn({
 }).startRTM();
 
 controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
-
-    bot.api.reactions.add({
-        timestamp: message.ts,
-        channel: message.channel,
-        name: 'robot_face',
-    }, function(err, res) {
-        if (err) {
-            bot.botkit.log('Failed to add emoji reaction :(', err);
-        }
-    });
-
-
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name) {
-            bot.reply(message, 'Hello :lion_face: ' + user.name + '!!');
+            bot.reply(message, 'Hello ' + user.name + '!!');
         } else {
             bot.reply(message, 'Hello. For a list of my commands just ask "what are your commands"');
         }
     });
 });
 
-//MY CODE HERE: ****************************************
+controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
+    var note = message.match[1];
+    controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name) {
+            //bot.reply(message, 'Hello ' + user.name + '!!');
+            bot.startConversation(message, function(err, convo) {
+                if (!err) {
+                  convo.ask('What lable should I store this note under?', function(response, convo) {
+                    convo.ask('Save lable as: ' + response.text + '`?', [
+                            {
+                                pattern: 'yes',
+                                callback: function(response, convo) {
+                                    // since no further messages are queued after this,
+                                    // the conversation will end naturally with status == 'completed'
+                                    convo.next();
+                                }
+                            },
+                            {
+                                pattern: 'ok',
+                                callback: function(response, convo) {
+                                    // since no further messages are queued after this,
+                                    // the conversation will end naturally with status == 'completed'
+                                    convo.next();
+                                }
+                            },
+                            {
+                                pattern: 'no',
+                                callback: function(response, convo) {
+                                    // stop the conversation. this will cause it to end with status == 'stopped'
+                                    convo.repeat();
+                                    convo.next();
+                                    //convo.stop();
+                                }
+                            },
+                            {
+                                pattern: 'cancel',
+                                callback: function(response, convo) {
+                                    // stop the conversation. this will cause it to end with status == 'stopped'
+                                    convo.stop();
+                                }
+                            },
+                            {
+                                default: true,
+                                callback: function(response, convo) {
+                                    convo.repeat();
+                                    convo.next();
+                                }
+                            }
+                        ]);
+                        convo.next();
+
+                    }, {'key': 'nickname'});
+                    
+                  convo.on('end', function(convo) {
+                        if (convo.status == 'completed') {
+                            bot.reply(message, 'OK! I will update my dossier...');
+
+                            controller.storage.users.get(message.user, function(err, user) {
+                                user.notes[convo.extractResponse('nickname')] = note;
+                                controller.storage.users.save(user, function(err, id) {
+                                    bot.reply(message, 'Saved');
+                                });
+                            });
+
+
+
+                        } else {
+                            // this happens if the conversation ended prematurely for some reason
+                            bot.reply(message, 'OK, nevermind!');
+                        }
+                    });
+                }
+              
+            });
+            
+        } else {
+            bot.reply(message, "I'm sorry but I can't save you notes until you ID yourself. Use command 'call me <name>");
+        }
+    });
+});
+
+controller.hears(['get (.*)', 'retrive (.*)','grab (.*)'], 'direct_message,direct_mention,mention', function(bot, message) { 
+  
+  var id = message.match[1];
+    controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name && user.notes[id]) { 
+          bot.reply(message,user.notes[id]);
+        }else{
+          bot.reply(message,"Could not find note: "+id);
+        }
+    });
+});
+
 controller.hears(['what are your commands'], 'direct_message,direct_mention,mention', function(bot, message) {
 
     controller.storage.users.get(message.user, function(err, user) {
@@ -58,18 +138,6 @@ controller.hears(['what are your commands'], 'direct_message,direct_mention,ment
         
     });
 });
-
-controller.hears(['fuck', 'fck', 'ass', 'bitch', 'dick'], 'direct_message,direct_mention,mention', function(bot, message) {
-
-    controller.storage.users.get(message.user, function(err, user) {
-        if (user && user.name) {
-            bot.reply(message, 'Hey ' + user.name + ' watch your fucking language, asshole!!!');
-        } else {
-            bot.reply(message, 'Hey watch your fucking language, asshole!!!');
-        }
-    });
-});
-
 
 controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var name = message.match[1];
@@ -85,6 +153,8 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
         });
     });
 });
+
+
 
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', function(bot, message) {
 
