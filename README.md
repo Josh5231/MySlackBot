@@ -13,6 +13,8 @@ Current command list:
 
 "what is my name" or "who am I" - Check if bot has setup user
 
+"what are your commands" or "commands" - Get a list of commands that Note-bot will respond to
+
 "uptime" or "who are you" - Get info about the bot and it's uptime
 
 "save <Note-to-save>" or "store <Note-to-save>" - Store a "note" in DB associated with "this" user
@@ -20,3 +22,5 @@ Current command list:
 "get <Note-Lable>" or "retrive <Note-Lable>" or "grab <Note-Lable>" - Retrieve note from DB
 
 "delete <Note-Lable>" or "remove <Note-Lable>" - Delete note
+
+"add-to <Note-Lable>" or "append <Note-Lable>" - Add text into a note

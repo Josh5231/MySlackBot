@@ -31,7 +31,6 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
     var note = message.match[1];
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name) {
-            //bot.reply(message, 'Hello ' + user.name + '!!');
             bot.startConversation(message, function(err, convo) {
                 if (!err) {
                   convo.ask('What lable should I store this note under?', function(response, convo) {
@@ -87,7 +86,7 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
             });
             
         } else {
-            bot.reply(message, "I'm sorry but I can't save you notes until you ID yourself. Use command 'call me <name>");
+            bot.reply(message, "I'm sorry but I can't save your notes until you ID yourself. Use command 'call me <name>");
         }
     });
 });
@@ -108,6 +107,27 @@ controller.hears(['delete (.*)', 'remove (.*)'], 'direct_message,direct_mention,
     });
 });
 
+controller.hears(['add-to (.*)', 'append (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
+    var id = message.match[1].toLowerCase();
+    controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name && user.notes[id]) {
+            bot.startConversation(message, function(err, convo) {
+                if (!err) {
+                  convo.ask('What would you like to add?', function(response, convo) {
+                    user.notes[id]+=" "+response.text;
+                    controller.storage.users.save(message.user,function(err,_id){
+                      bot.reply(message,"Text added and saved.");
+                    });
+                    convo.stop();
+                  });
+                  }
+            });
+        }
+        else{ bot.reply(message,"Could not find note: "+id); }
+    });
+
+});
+
 controller.hears(['get (.*)', 'retrive (.*)','grab (.*)'], 'direct_message,direct_mention,mention', function(bot, message) { 
   
   var id = message.match[1].toLowerCase();
@@ -117,15 +137,6 @@ controller.hears(['get (.*)', 'retrive (.*)','grab (.*)'], 'direct_message,direc
         }else{
           bot.reply(message,"Could not find note: "+id);
         }
-    });
-});
-
-controller.hears(['what are your commands'], 'direct_message,direct_mention,mention', function(bot, message) {
-
-    controller.storage.users.get(message.user, function(err, user) {
-        
-            bot.reply(message, 'The commands I respond to are: \n "Hello" or "Hi" \n "my name is <nickname> or "call me <nickname>" \n "what is my name" or "who am I" \n "uptime" or "who are you" \n "save <Note-to-save>" or "store <Note-to-save>" \n "get <Note-Lable>" or "retrive <Note-Lable>" or "grab <Note-Lable>" ');
-        
     });
 });
 
@@ -144,7 +155,14 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
+controller.hears(['what are your commands','commands'], 'direct_message,direct_mention,mention', function(bot, message) {
 
+    controller.storage.users.get(message.user, function(err, user) {
+        
+            bot.reply(message, 'The commands I respond to are: \n "Hello" or "Hi" \n "my name is <nickname> or "call me <nickname>" \n "what is my name" or "who am I" \n "uptime" or "who are you" \n "save <Note-to-save>" or "store <Note-to-save>" \n "get <Note-Lable>" or "retrive <Note-Lable>" or "grab <Note-Lable>" \n "delete <Note-Lable>" or "remove <Note-Lable>" \n "add-to <Note-Lable>" or "append <Note-Lable>"');
+        
+    });
+});
 
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', function(bot, message) {
 
