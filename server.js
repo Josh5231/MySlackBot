@@ -28,7 +28,7 @@ var bot = controller.spawn({
 }).startRTM();
 
 controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
-    var note = message.match[1];
+    var note = message.match[1].toLowerCase();
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name) {
             //bot.reply(message, 'Hello ' + user.name + '!!');
@@ -94,7 +94,7 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
 
 controller.hears(['get (.*)', 'retrive (.*)','grab (.*)'], 'direct_message,direct_mention,mention', function(bot, message) { 
   
-  var id = message.match[1];
+  var id = message.match[1].toLowerCase();
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name && user.notes[id]) { 
           bot.reply(message,user.notes[id]);
