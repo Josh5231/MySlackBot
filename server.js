@@ -28,14 +28,14 @@ var bot = controller.spawn({
 }).startRTM();
 
 controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
-    var note = message.match[1].toLowerCase();
+    var note = message.match[1];
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name) {
             //bot.reply(message, 'Hello ' + user.name + '!!');
             bot.startConversation(message, function(err, convo) {
                 if (!err) {
                   convo.ask('What lable should I store this note under?', function(response, convo) {
-                    convo.ask('Save lable as: ' + response.text + '`?', [
+                    convo.ask('Save lable as: ' + response.text.toLowerCase() + '`?', [
                             {
                                 pattern: 'yes',
                                 callback: function(response, convo) { convo.next(); }
@@ -69,7 +69,7 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
                             controller.storage.users.get(message.user, function(err, user) {
                               if(err){ console.log("Error getting user"); }
                                 if(!user.notes){ user.notes = {}; }
-                                user.notes[convo.extractResponse('nickname')] = note;
+                                user.notes[convo.extractResponse('nickname').toLowerCase()] = note;
                                 controller.storage.users.save(user, function(err, id) {
                                     bot.reply(message, 'Saved');
                                 });
