@@ -15,6 +15,11 @@ var Botkit = require('botkit');
 var os = require('os');
 var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGOURI });
 
+var http = require("http");
+setInterval(function() {
+    http.get("http://slackbot01.herokuapp.com");
+}, 600000); // every 10 minutes (600000)
+
 app.listen(process.env.PORT || 8080);
 
 var controller = Botkit.slackbot({
