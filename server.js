@@ -9,9 +9,13 @@ if (!process.env.MONGOURI) {
     process.exit(1);
 }
 
+var express= require("express");
+var app = express();
 var Botkit = require('botkit');
 var os = require('os');
 var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGOURI });
+
+app.listen(process.env.PORT || 8080);
 
 var controller = Botkit.slackbot({
     debug: false,
