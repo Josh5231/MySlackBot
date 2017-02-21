@@ -93,11 +93,15 @@ controller.hears(['store (.*)', 'save (.*)'], 'direct_message,direct_mention,men
 });
 
 controller.hears(['delete (.*)', 'remove (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
-    var id = message.match[1];
+    var id = message.match[1].toLowerCase();
     controller.storage.users.get(message.user, function(err, user) {
         if (user && user.name && user.notes[id]) { 
           delete user.notes[id];
-          bot.reply(message,id+" deleted.");
+          controller.storage.users.save(user, function(err, _id) 
+          {
+            bot.reply(message,id+" has been deleted.");
+          });
+          
         }else{
           bot.reply(message,"Could not find note: "+id);
         }
