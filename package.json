@@ -1,0 +1,19 @@
+{
+  "name": "slack-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "author": "Josh Sanders",
+  "dependencies": {
+    "async": "~0.2.8",
+    "botkit": "^0.5.0",
+    "botkit-storage-mongo": "^1.0.4",
+    "express": "~3.2.4",
+    "socket.io": "~0.9.14"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "devDependencies": {},
+  "license": "ISC"
+}
